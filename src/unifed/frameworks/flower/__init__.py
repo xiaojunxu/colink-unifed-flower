@@ -1,7 +1,7 @@
 import sys
 
-from unifed.frameworks.example import protocol
-from unifed.frameworks.example.workload_sim import *
+from unifed.frameworks.flower import protocol
+from unifed.frameworks.flower.workload_sim import *
 
 
 def run_protocol():

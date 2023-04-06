@@ -1,0 +1,164 @@
+diff --git a/src/py/flwr/client/app.py b/src/py/flwr/client/app.py
+index db0ee7f1..24439877 100644
+--- a/src/py/flwr/client/app.py
++++ b/src/py/flwr/client/app.py
+@@ -14,7 +14,7 @@
+ # ==============================================================================
+ """Flower client app."""
+ 
+-
++import flbenchmark.logging
+ import time
+ from logging import INFO
+ from typing import Callable, Dict, Optional, Union
+@@ -85,6 +85,7 @@ def start_client(
+     *,
+     server_address: str,
+     client: Client,
++    client_index: int,
+     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+     root_certificates: Optional[bytes] = None,
+     rest: bool = False,
+@@ -139,6 +140,8 @@ def start_client(
+ 
+     # Use either gRPC bidirectional streaming or REST request/response
+     connection = http_request_response if rest else grpc_connection
++    logger = flbenchmark.logging.Logger(id=client_index, agent_type='client')
++    logger.training_start()
+     while True:
+         sleep_duration: int = 0
+         with connection(
+@@ -149,14 +152,18 @@ def start_client(
+             receive, send = conn
+ 
+             while True:
++                logger.communication_start(target_id=-1)
+                 server_message = receive()
++                logger.communication_end(metrics={'byte': server_message.ByteSize()})
+                 if server_message is None:
+                     time.sleep(3)  # Wait for 3s before asking again
+                     continue
+                 client_message, sleep_duration, keep_going = handle(
+                     client, server_message
+                 )
++                logger.communication_start(target_id=-1)
+                 send(client_message)
++                logger.communication_end(metrics={'byte': client_message.ByteSize()})
+                 if not keep_going:
+                     break
+         if sleep_duration == 0:
+@@ -169,6 +176,8 @@ def start_client(
+             sleep_duration,
+         )
+         time.sleep(sleep_duration)
++    logger.training_end()
++    logger.end()
+ 
+     event(EventType.START_CLIENT_LEAVE)
+ 
+@@ -177,6 +186,7 @@ def start_numpy_client(
+     *,
+     server_address: str,
+     client: NumPyClient,
++    client_index: int,
+     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+     root_certificates: Optional[bytes] = None,
+     rest: bool = False,
+@@ -230,6 +240,7 @@ def start_numpy_client(
+     start_client(
+         server_address=server_address,
+         client=_wrap_numpy_client(client=client),
++        client_index=client_index,
+         grpc_max_message_length=grpc_max_message_length,
+         root_certificates=root_certificates,
+         rest=rest,
+diff --git a/src/py/flwr/server/server.py b/src/py/flwr/server/server.py
+index da43f77f..33f5ece5 100644
+--- a/src/py/flwr/server/server.py
++++ b/src/py/flwr/server/server.py
+@@ -14,7 +14,7 @@
+ # ==============================================================================
+ """Flower server."""
+ 
+-
++import flbenchmark.logging
+ import concurrent.futures
+ import timeit
+ from logging import DEBUG, INFO
+@@ -64,6 +64,7 @@ class Server:
+         )
+         self.strategy: Strategy = strategy if strategy is not None else FedAvg()
+         self.max_workers: Optional[int] = None
++        self.logger = flbenchmark.logging.Logger(id=0, agent_type='aggregator')
+ 
+     def set_max_workers(self, max_workers: Optional[int]) -> None:
+         """Set the max_workers used by ThreadPoolExecutor."""
+@@ -101,13 +102,19 @@ class Server:
+         log(INFO, "FL starting")
+         start_time = timeit.default_timer()
+ 
++        self.logger.training_start()
++
+         for current_round in range(1, num_rounds + 1):
++            self.logger.training_round_start()
+             # Train model and replace previous global model
+             res_fit = self.fit_round(server_round=current_round, timeout=timeout)
+             if res_fit:
+                 parameters_prime, _, _ = res_fit  # fit_metrics_aggregated
+                 if parameters_prime:
+                     self.parameters = parameters_prime
++            self.logger.training_round_end()
++            if current_round == num_rounds:
++                self.logger.training_end()
+ 
+             # Evaluate model using strategy implementation
+             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
+@@ -127,16 +134,21 @@ class Server:
+                 )
+ 
+             # Evaluate model on a sample of available clients
+-            res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
+-            if res_fed:
+-                loss_fed, evaluate_metrics_fed, _ = res_fed
+-                if loss_fed:
+-                    history.add_loss_distributed(
+-                        server_round=current_round, loss=loss_fed
+-                    )
+-                    history.add_metrics_distributed(
+-                        server_round=current_round, metrics=evaluate_metrics_fed
+-                    )
++            if current_round == num_rounds:
++                res_fed = self.evaluate_round(server_round=current_round, timeout=timeout)
++                if res_fed:
++                    loss_fed, evaluate_metrics_fed, _ = res_fed
++                    if loss_fed:
++                        with self.logger.model_evaluation() as e:
++                            e.report_metric('target_metric', evaluate_metrics_fed['target_metric'])
++                            e.report_metric('loss', loss_fed)
++                        self.logger.end()
++                        history.add_loss_distributed(
++                            server_round=current_round, loss=loss_fed
++                        )
++                        history.add_metrics_distributed(
++                            server_round=current_round, metrics=evaluate_metrics_fed
++                        )
+ 
+         # Bookkeeping
+         end_time = timeit.default_timer()
+@@ -235,10 +247,12 @@ class Server:
+         )
+ 
+         # Aggregate training results
+-        aggregated_result: Tuple[
+-            Optional[Parameters],
+-            Dict[str, Scalar],
+-        ] = self.strategy.aggregate_fit(server_round, results, failures)
++        with self.logger.computation() as c:
++            aggregated_result: Tuple[
++                Optional[Parameters],
++                Dict[str, Scalar],
++            ] = self.strategy.aggregate_fit(server_round, results, failures)
++            # c.report_metric('flops', ?)
+ 
+         parameters_aggregated, metrics_aggregated = aggregated_result
+         return parameters_aggregated, metrics_aggregated, (results, failures)
