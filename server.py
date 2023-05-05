@@ -1,4 +1,5 @@
 from typing import List, Tuple
+import os
 import sys
 import json
 import glob
@@ -26,7 +27,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
         # Aggregate and return custom metric (weighted average)
         return {"target_metric": sum(target_metrics) / sum(examples)}
 
-client_num = len(glob.glob(f'~/flbenchmark.working/csv_data/{config["dataset"]}_train/*.csv'))
+client_num = len(glob.glob(os.path.join(os.path.expanduser('~'), f'flbenchmark.working/csv_data/{config["dataset"]}_train/*.csv')))
 fit_client_num = int(config['training_param']['client_per_round'])
 # Define strategy
 strategy = fl.server.strategy.FedAvg(fraction_fit=config['training_param']['client_per_round']/client_num, fraction_evaluate=1.0, min_fit_clients=fit_client_num, min_evaluate_clients=client_num, min_available_clients=client_num, evaluate_metrics_aggregation_fn=weighted_average)

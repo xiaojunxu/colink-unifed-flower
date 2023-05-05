@@ -1,6 +1,7 @@
 import warnings
 from collections import OrderedDict
 import flbenchmark.logging
+import os
 import sys
 import json
 import glob
@@ -141,7 +142,7 @@ def load_data():
         y["train"] = []
         y["test"] = []
         for dir_path in ["train", "test"]:
-            data_paths = sorted(glob.glob(f'~/flbenchmark.working/csv_data/{config["dataset"]}_{dir_path}/*.csv'))
+            data_paths = sorted(glob.glob(os.path.join(os.path.expanduser('~'), f'flbenchmark.working/csv_data/{config["dataset"]}_{dir_path}/*.csv')))
             if dir_path == 'train':
                 data_paths = data_paths[int(sys.argv[2])-1:int(sys.argv[2])]
             for data_path in data_paths:
