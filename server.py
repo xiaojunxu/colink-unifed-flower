@@ -5,7 +5,7 @@ import json
 import glob
 import flwr as fl
 from flwr.common import Metrics
-import flbenchmark
+import flbenchmark.datasets
 from sklearn.metrics import roc_auc_score
 
 config = json.load(open(sys.argv[1], 'r'))

@@ -1,6 +1,7 @@
 import warnings
 from collections import OrderedDict
-import flbenchmark
+import flbenchmark.datasets
+import flbenchmark.logging
 import os
 import sys
 import json
