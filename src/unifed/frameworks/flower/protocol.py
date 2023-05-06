@@ -66,6 +66,7 @@ def run_server(cl: CL.CoLink, param: bytes, participants: List[CL.Participant]):
     flower_config = unifed_config
     flower_config["training_param"] = flower_config["training"]
     flower_config.pop("training")
+    flower_config["training_param"]["epochs"] = flower_config["training_param"]["global_epochs"]
     flower_config["bench_param"] = flower_config["deployment"]
     with open("config.json", "w") as cf:
         json.dump(flower_config, cf)
@@ -86,6 +87,7 @@ def run_client(cl: CL.CoLink, param: bytes, participants: List[CL.Participant]):
     flower_config = unifed_config
     flower_config["training_param"] = flower_config["training"]
     flower_config.pop("training")
+    flower_config["training_param"]["epochs"] = flower_config["training_param"]["global_epochs"]
     flower_config["bench_param"] = flower_config["deployment"]
     with open("config.json", "w") as cf:
         json.dump(flower_config, cf)
