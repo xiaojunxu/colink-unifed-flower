@@ -71,22 +71,22 @@ def run_server(cl: CL.CoLink, param: bytes, participants: List[CL.Participant]):
     with open("config.json", "w") as cf:
         json.dump(flower_config, cf)
     # load dataset
-    flbd = flbenchmark.datasets.FLBDatasets('~/flbenchmark.working/data')
-    val_dataset = None
-    if flower_config['dataset'] == 'reddit':
-        train_dataset, test_dataset, val_dataset = flbd.leafDatasets(flower_config['dataset'])
-    elif flower_config['dataset'] == 'femnist':
-        train_dataset, test_dataset = flbd.leafDatasets(flower_config['dataset'])
-    else:
-        train_dataset, test_dataset = flbd.fateDatasets(flower_config['dataset'])
-    train_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_train'
-    test_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_test'
-    val_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_val'
-    flbenchmark.datasets.convert_to_csv(train_dataset, out_dir=train_data_base)
-    if test_dataset is not None:
-        flbenchmark.datasets.convert_to_csv(test_dataset, out_dir=test_data_base)
-    if val_dataset is not None:
-        flbenchmark.datasets.convert_to_csv(val_dataset, out_dir=val_data_base)
+    # flbd = flbenchmark.datasets.FLBDatasets('~/flbenchmark.working/data')
+    # val_dataset = None
+    # if flower_config['dataset'] == 'reddit':
+    #     train_dataset, test_dataset, val_dataset = flbd.leafDatasets(flower_config['dataset'])
+    # elif flower_config['dataset'] == 'femnist':
+    #     train_dataset, test_dataset = flbd.leafDatasets(flower_config['dataset'])
+    # else:
+    #     train_dataset, test_dataset = flbd.fateDatasets(flower_config['dataset'])
+    # train_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_train'
+    # test_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_test'
+    # val_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_val'
+    # flbenchmark.datasets.convert_to_csv(train_dataset, out_dir=train_data_base)
+    # if test_dataset is not None:
+    #     flbenchmark.datasets.convert_to_csv(test_dataset, out_dir=test_data_base)
+    # if val_dataset is not None:
+    #     flbenchmark.datasets.convert_to_csv(val_dataset, out_dir=val_data_base)
     # for certain frameworks, clients need to learn the ip of the server
     # in that case, we get the ip of the current machine and send it to the clients
     server_ip = get_local_ip()
@@ -108,22 +108,22 @@ def run_client(cl: CL.CoLink, param: bytes, participants: List[CL.Participant]):
     with open("config.json", "w") as cf:
         json.dump(flower_config, cf)
     # load dataset
-    flbd = flbenchmark.datasets.FLBDatasets('~/flbenchmark.working/data')
-    val_dataset = None
-    if flower_config['dataset'] == 'reddit':
-        train_dataset, test_dataset, val_dataset = flbd.leafDatasets(flower_config['dataset'])
-    elif flower_config['dataset'] == 'femnist':
-        train_dataset, test_dataset = flbd.leafDatasets(flower_config['dataset'])
-    else:
-        train_dataset, test_dataset = flbd.fateDatasets(flower_config['dataset'])
-    train_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_train'
-    test_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_test'
-    val_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_val'
-    flbenchmark.datasets.convert_to_csv(train_dataset, out_dir=train_data_base)
-    if test_dataset is not None:
-        flbenchmark.datasets.convert_to_csv(test_dataset, out_dir=test_data_base)
-    if val_dataset is not None:
-        flbenchmark.datasets.convert_to_csv(val_dataset, out_dir=val_data_base)
+    # flbd = flbenchmark.datasets.FLBDatasets('~/flbenchmark.working/data')
+    # val_dataset = None
+    # if flower_config['dataset'] == 'reddit':
+    #     train_dataset, test_dataset, val_dataset = flbd.leafDatasets(flower_config['dataset'])
+    # elif flower_config['dataset'] == 'femnist':
+    #     train_dataset, test_dataset = flbd.leafDatasets(flower_config['dataset'])
+    # else:
+    #     train_dataset, test_dataset = flbd.fateDatasets(flower_config['dataset'])
+    # train_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_train'
+    # test_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_test'
+    # val_data_base = '~/flbenchmark.working/data/'+flower_config['dataset']+'_val'
+    # flbenchmark.datasets.convert_to_csv(train_dataset, out_dir=train_data_base)
+    # if test_dataset is not None:
+    #     flbenchmark.datasets.convert_to_csv(test_dataset, out_dir=test_data_base)
+    # if val_dataset is not None:
+    #     flbenchmark.datasets.convert_to_csv(val_dataset, out_dir=val_data_base)
     # get the ip of the server
     server_in_list = [p for p in participants if p.role == "server"]
     assert len(server_in_list) == 1
