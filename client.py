@@ -99,7 +99,7 @@ def load_data():
         # Dataset Pre-processing, using the same (slightly changed) code as in fedlearner
         def load_data(split, use_first_k=None):
             use_first_k = None
-            with open('~/flbenchmark.working/csv_data/reddit_%s/_main.json'%split) as inf:
+            with open('~/flbenchmark.working/data/reddit_%s/_main.json'%split) as inf:
                 meta_info = json.load(inf)
                 parties = meta_info['parties']
             if use_first_k is not None:
@@ -108,7 +108,7 @@ def load_data():
 
             all_data = {pid:[] for pid in parties}
             for pid in parties:
-                df = pd.read_csv('~/flbenchmark.working/csv_data/reddit_%s/%s.csv'%(split, pid))
+                df = pd.read_csv('~/flbenchmark.working/data/reddit_%s/%s.csv'%(split, pid))
                 for _, row in df.iterrows():
                     cur_frame = ast.literal_eval(row['x0'])
                     cur_x = [tok for sent in cur_frame for tok in sent if tok != '<PAD>']
@@ -142,7 +142,7 @@ def load_data():
         y["train"] = []
         y["test"] = []
         for dir_path in ["train", "test"]:
-            data_paths = sorted(glob.glob(os.path.join(os.path.expanduser('~'), f'flbenchmark.working/csv_data/{config["dataset"]}_{dir_path}/*.csv')))
+            data_paths = sorted(glob.glob(os.path.join(os.path.expanduser('~'), f'flbenchmark.working/data/{config["dataset"]}_{dir_path}/*.csv')))
             if dir_path == 'train':
                 data_paths = data_paths[int(sys.argv[2])-1:int(sys.argv[2])]
             for data_path in data_paths:
@@ -166,18 +166,18 @@ def load_data():
         client_name = 'guest' if int(sys.argv[2]) == 1 else 'host'
         if config['dataset'] == 'default_credit_horizontal' and int(sys.argv[2]) == 2:
             client_name += '_1'
-        train_data = pd.read_csv(f'~/flbenchmark.working/csv_data/{config["dataset"]}_train/{config["dataset"].replace("horizontal", "homo")}_{client_name}.csv', sep=',')
+        train_data = pd.read_csv(f'~/flbenchmark.working/data/{config["dataset"]}_train/{config["dataset"].replace("horizontal", "homo")}_{client_name}.csv', sep=',')
         if config["dataset"] == 'vehicle_scale_horizontal':
             train_X = np.array(train_data.iloc[:, 2:]).astype(np.float32)
             train_y = np.array(train_data.y).astype(np.int32)
-            test_data = pd.read_csv(f'~/flbenchmark.working/csv_data/{config["dataset"]}_train/{config["dataset"].replace("horizontal", "homo")}_guest.csv', sep=',')
+            test_data = pd.read_csv(f'~/flbenchmark.working/data/{config["dataset"]}_train/{config["dataset"].replace("horizontal", "homo")}_guest.csv', sep=',')
             test_X = np.array(test_data.iloc[:, 2:]).astype(np.float32)
             test_y = np.array(test_data.y).astype(np.int32)
-            test_data = pd.read_csv(f'~/flbenchmark.working/csv_data/{config["dataset"]}_train/{config["dataset"].replace("horizontal", "homo")}_host.csv', sep=',')
+            test_data = pd.read_csv(f'~/flbenchmark.working/data/{config["dataset"]}_train/{config["dataset"].replace("horizontal", "homo")}_host.csv', sep=',')
             test_X = np.concatenate((test_X, np.array(test_data.iloc[:, 2:]).astype(np.float32)), axis=0)
             test_y = np.concatenate((test_y, np.array(test_data.y).astype(np.int32)), axis=0)
         else:
-            test_data = pd.read_csv(f'~/flbenchmark.working/csv_data/{config["dataset"]}_test/{config["dataset"].replace("horizontal", "homo")}_test.csv', sep=',')
+            test_data = pd.read_csv(f'~/flbenchmark.working/data/{config["dataset"]}_test/{config["dataset"].replace("horizontal", "homo")}_test.csv', sep=',')
             if config['dataset'] == 'student_horizontal':
                 train_X = np.array(pd.concat([train_data.iloc[:, 9:], train_data.iloc[:, 1:8]], axis=1)).astype(np.float32)
                 train_y = np.array(train_data.y).astype(np.float32)
