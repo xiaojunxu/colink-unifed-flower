@@ -1,6 +1,6 @@
 import warnings
 from collections import OrderedDict
-import flbenchmark.logging
+import flbenchmark
 import os
 import sys
 import json
@@ -21,6 +21,24 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 import ast
 
 config = json.load(open(sys.argv[1], 'r'))
+
+# load dataset
+flbd = flbenchmark.datasets.FLBDatasets('~/flbenchmark.working/data')
+val_dataset = None
+if config['dataset'] == 'reddit':
+    train_dataset, test_dataset, val_dataset = flbd.leafDatasets(config['dataset'])
+elif config['dataset'] == 'femnist':
+    train_dataset, test_dataset = flbd.leafDatasets(config['dataset'])
+else:
+    train_dataset, test_dataset = flbd.fateDatasets(config['dataset'])
+train_data_base = '~/flbenchmark.working/data/'+config['dataset']+'_train'
+test_data_base = '~/flbenchmark.working/data/'+config['dataset']+'_test'
+val_data_base = '~/flbenchmark.working/data/'+config['dataset']+'_val'
+flbenchmark.datasets.convert_to_csv(train_dataset, out_dir=train_data_base)
+if test_dataset is not None:
+    flbenchmark.datasets.convert_to_csv(test_dataset, out_dir=test_data_base)
+if val_dataset is not None:
+    flbenchmark.datasets.convert_to_csv(val_dataset, out_dir=val_data_base)
 
 if config['dataset'] == 'reddit':
     num_class = 0
