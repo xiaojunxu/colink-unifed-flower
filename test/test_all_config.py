@@ -15,30 +15,6 @@ def simulate_with_config(config_file_path):
     case_name = config_file_path.split("/")[-1].split(".")[0]
     with open(config_file_path, "r") as cf:
         config = json.load(cf)
-    # convert config format
-    flower_config = copy.deepcopy(config)
-    flower_config["training_param"] = flower_config["training"]
-    flower_config.pop("training")
-    flower_config["bench_param"] = flower_config["deployment"]
-    with open("config.json", "w") as cf:
-        json.dump(flower_config, cf)
-    # load dataset
-    flbd = flbenchmark.datasets.FLBDatasets('../data')
-    val_dataset = None
-    if config['dataset'] == 'reddit':
-        train_dataset, test_dataset, val_dataset = flbd.leafDatasets(config['dataset'])
-    elif config['dataset'] == 'femnist':
-        train_dataset, test_dataset = flbd.leafDatasets(config['dataset'])
-    else:
-        train_dataset, test_dataset = flbd.fateDatasets(config['dataset'])
-    train_data_base = os.path.abspath('../csv_data/'+config['dataset']+'_train')
-    test_data_base = os.path.abspath('../csv_data/'+config['dataset']+'_test')
-    val_data_base = os.path.abspath('../csv_data/'+config['dataset']+'_val')
-    flbenchmark.datasets.convert_to_csv(train_dataset, out_dir=train_data_base)
-    if test_dataset is not None:
-        flbenchmark.datasets.convert_to_csv(test_dataset, out_dir=test_data_base)
-    if val_dataset is not None:
-        flbenchmark.datasets.convert_to_csv(val_dataset, out_dir=val_data_base)
 
     # use instant server for simulation
     ir = CL.InstantRegistry()
