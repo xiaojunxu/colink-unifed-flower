@@ -28,6 +28,7 @@ def run_external_process_and_collect_result(cl: CL.CoLink, participant_id,  role
         # you can also expect the target process to generate files and then read them
 
         # start training procedure
+        print(f"{role}_{participant_id} starts popen...")
         process = subprocess.Popen(
             [
                 "python",  
@@ -42,7 +43,11 @@ def run_external_process_and_collect_result(cl: CL.CoLink, participant_id,  role
             stderr=subprocess.PIPE
         )
         # gather result
+        print(f"{role}_{participant_id} starts gathering results...")
         stdout, stderr = process.communicate()
+        print(f"{role}_{participant_id} done!")
+        print(stdout.decode())
+        print(stderr.decode())
         returncode = process.returncode
         with open(temp_output_filename, "rb") as f:
             output = f.read()
