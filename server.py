@@ -53,7 +53,7 @@ strategy = fl.server.strategy.FedAvg(fraction_fit=config['training_param']['clie
 
 # Start Flower server
 fl.server.start_server(
-    server_address="127.0.0.1:8080",
+    server_address=f"{sys.argv[3]}:8080",
     config=fl.server.ServerConfig(num_rounds=config['training_param']['epochs']),
     strategy=strategy,
 )

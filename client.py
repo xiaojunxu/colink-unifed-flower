@@ -389,4 +389,4 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=FlowerClient(), client_index=int(sys.argv[2]))
+fl.client.start_numpy_client(server_address=f"{sys.argv[3]}:8080", client=FlowerClient(), client_index=int(sys.argv[2]))

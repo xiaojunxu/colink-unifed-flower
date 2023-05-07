@@ -36,6 +36,7 @@ def run_external_process_and_collect_result(cl: CL.CoLink, participant_id,  role
                 f"{role}.py",
                 "config.json",
                 str(participant_id),
+                str(server_ip),
                 # temp_output_filename,
                 # temp_log_filename,
             ],
